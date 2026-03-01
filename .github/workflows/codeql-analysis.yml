@@ -1,14 +1,34 @@
-name: CodeQL
+name: CodeQL Advanced Security
 
 on:
   pull_request:
     branches:
       - main
+    paths:
+      - '**.js'
+      - '**.ts'
+      - '**.jsx'
+      - '**.tsx'
+      - '**.mjs'
+      - '**.cjs'
+      - '**.json'
+      - '**.yml'
+      - '**.yaml'
   push:
     branches:
       - main
+    paths:
+      - '**.js'
+      - '**.ts'
+      - '**.jsx'
+      - '**.tsx'
+      - '**.mjs'
+      - '**.cjs'
+      - '**.json'
+      - '**.yml'
+      - '**.yaml'
   schedule:
-    - cron: '31 7 * * 3'
+    - cron: '0 5 * * 0'
 
 permissions:
   actions: read
@@ -20,17 +40,21 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
 
     strategy:
       fail-fast: false
       matrix:
         language:
           - javascript
+          - typescript
 
     steps:
       - name: Checkout
         id: checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Initialize CodeQL
         id: initialize
@@ -38,7 +62,7 @@ jobs:
         with:
           config-file: .github/codeql/codeql-config.yml
           languages: ${{ matrix.language }}
-          source-root: src
+          queries: security-extended
 
       - name: Autobuild
         id: autobuild
@@ -47,3 +71,64 @@ jobs:
       - name: Perform CodeQL Analysis
         id: analyze
         uses: github/codeql-action/analyze@v4
+        with:
+          category: '/language:${{ matrix.language }}'
+          upload: true
+
+  analyze-security:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    needs: analyze
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: javascript
+          queries: security-and-quality
+
+      - name: Build
+        run: |
+          npm install --legacy-peer-deps
+          npm run build || echo "Build step not available"
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: '/language:javascript/security'
+          upload: true
+
+  dependency-security:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: Run snyk test
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true

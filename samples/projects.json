@@ -1,0 +1,12 @@
+{
+  "csharp": {
+    "projects": {
+      "Project1": {
+        "paths": ["src/FolderA", "src/FolderB"]
+      },
+      "Project2": {
+        "paths": ["src/FolderC"]
+      }
+    }
+  }
+}

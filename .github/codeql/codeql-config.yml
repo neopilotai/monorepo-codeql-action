@@ -1,5 +1,32 @@
-name: JavaScript CodeQL Configuration
+name: Advanced Security CodeQL Configuration
+
+queries:
+  - uses: security-and-quality
+  - uses: security-extended
 
 paths-ignore:
   - node_modules
   - dist
+  - '**/*.min.js'
+  - '**/coverage/**'
+  - '**/.git/**'
+  - '**/build/**'
+  - '**/dist/**'
+  - '**/node_modules/**'
+
+paths:
+  - '**/*.js'
+  - '**/*.ts'
+  - '**/*.jsx'
+  - '**/*.tsx'
+  - '**/*.mjs'
+  - '**/*.cjs'
+
+exclude:
+  - '**/test/**'
+  - '**/__tests__/**'
+  - '**/*.test.*'
+  - '**/*.spec.*'
+  - '**/fixtures/**'
+
+disable-default-queries: false

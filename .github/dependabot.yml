@@ -9,6 +9,7 @@ updates:
         update-types:
           - minor
           - patch
+    open-pull-requests-limit: 10
 
   - package-ecosystem: npm
     directory: /
@@ -24,3 +25,36 @@ updates:
         dependency-type: production
         update-types:
           - patch
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    labels:
+      - dependencies
+      - security
+
+  - package-ecosystem: npm
+    directory: /tests
+    schedule:
+      interval: weekly
+    groups:
+      npm-test:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - security
+
+  - package-ecosystem: terraform
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - security

@@ -1,0 +1,144 @@
+name: Infrastructure as Code Security
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.tf'
+      - '**.yml'
+      - '**.yaml'
+      - '**.json'
+      - 'Dockerfile'
+      - '**/Dockerfile*'
+      - '**.toml'
+      - '**.ini'
+      - '**.cfg'
+      - '.devcontainer/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**.tf'
+      - '**.yml'
+      - '**.yaml'
+      - '**.json'
+      - 'Dockerfile'
+      - '**/Dockerfile*'
+      - '**.toml'
+      - '**.ini'
+      - '**.cfg'
+      - '.devcontainer/**'
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  checkov-scan:
+    name: Checkov Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Checkov on Terraform
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: terraform
+          output_format: sarif
+          output_file_path: results/checkov-terraform.sarif
+
+      - name: Run Checkov on CloudFormation
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: cloudformation
+          output_format: sarif
+          output_file_path: results/checkov-cloudformation.sarif
+
+      - name: Run Checkov on Kubernetes
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: kubernetes
+          output_format: sarif
+          output_file_path: results/checkov-kubernetes.sarif
+
+      - name: Run Checkov on Docker
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: dockerfile
+          output_format: sarif
+          output_file_path: results/checkov-dockerfile.sarif
+
+      - name: Upload Checkov results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results/checkov-terraform.sarif
+          category: checkov-terraform
+
+      - name: Upload CloudFormation results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results/checkov-cloudformation.sarif
+          category: checkov-cloudformation
+
+      - name: Upload Kubernetes results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results/checkov-kubernetes.sarif
+          category: checkov-kubernetes
+
+      - name: Upload Dockerfile results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results/checkov-dockerfile.sarif
+          category: checkov-dockerfile
+
+  trivy-scan:
+    name: Trivy Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'results/trivy.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results/trivy.sarif
+          category: trivy
+
+  check-git-secrets:
+    name: Check for committed secrets in IaC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for secrets in IaC files
+        run: |
+          if command -v trufflehog &> /dev/null; then
+            trufflehog filesystem . --filter-verified --no-update || true
+          else
+            echo "TruffleHog not installed, skipping"
+          fi

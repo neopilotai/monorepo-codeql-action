@@ -1,0 +1,4 @@
+Processing build_projects_dummy.xml with variables: FolderADir: src/FolderA
+FolderBDir: src/FolderB
+FolderCDir: src/FolderC
+::set-output name=projects::[{"name":"project1","path":"src/project1"},{"name":"project2","path":"src/project2"}]
