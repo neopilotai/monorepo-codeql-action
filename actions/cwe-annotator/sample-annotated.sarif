@@ -1,0 +1,765 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "version": "2.14.0",
+          "informationUri": "https://codeql.github.com/",
+          "rules": [
+            {
+              "id": "js/injection",
+              "name": "Code injection",
+              "description": "This query checks for code injection vulnerabilities.",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "injection",
+                  "cwe:CWE-89",
+                  "cwe-name:sql-injection",
+                  "cwe-category:injection",
+                  "cwe-severity:high",
+                  "cwe:CWE-90",
+                  "cwe-name:unknown",
+                  "cwe-category:unknown",
+                  "cwe-severity:unknown",
+                  "cwe:CWE-91",
+                  "cwe:CWE-93",
+                  "cwe:CWE-94",
+                  "cwe-name:code-injection",
+                  "cwe-severity:critical",
+                  "cwe:CWE-95",
+                  "cwe:CWE-96",
+                  "cwe:CWE-97",
+                  "cwe:CWE-98",
+                  "cwe:CWE-99"
+                ],
+                "precision": "very-high",
+                "cwe": [
+                  {
+                    "id": "CWE-89",
+                    "name": "SQL Injection",
+                    "category": "Injection",
+                    "severity": "high"
+                  },
+                  {
+                    "id": "CWE-90",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-91",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-93",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-94",
+                    "name": "Code Injection",
+                    "category": "Injection",
+                    "severity": "critical"
+                  },
+                  {
+                    "id": "CWE-95",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-96",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-97",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-98",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-99",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "js/xss",
+              "name": "Cross-site scripting",
+              "description": "This query checks for XSS vulnerabilities.",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "xss",
+                  "cwe:CWE-79",
+                  "cwe-name:cross-site-scripting-(xss)",
+                  "cwe-category:xss",
+                  "cwe-severity:high",
+                  "cwe:CWE-80",
+                  "cwe-name:unknown",
+                  "cwe-category:unknown",
+                  "cwe-severity:unknown",
+                  "cwe:CWE-81",
+                  "cwe:CWE-82",
+                  "cwe:CWE-83",
+                  "cwe:CWE-84",
+                  "cwe:CWE-85",
+                  "cwe:CWE-86",
+                  "cwe:CWE-87"
+                ],
+                "precision": "very-high",
+                "cwe": [
+                  {
+                    "id": "CWE-79",
+                    "name": "Cross-site Scripting (XSS)",
+                    "category": "XSS",
+                    "severity": "high"
+                  },
+                  {
+                    "id": "CWE-80",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-81",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-82",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-83",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-84",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-85",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-86",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-87",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "js/sql-injection",
+              "name": "SQL injection",
+              "description": "This query checks for SQL injection vulnerabilities.",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "injection",
+                  "database",
+                  "cwe:CWE-89",
+                  "cwe-name:sql-injection",
+                  "cwe-category:injection",
+                  "cwe-severity:high",
+                  "cwe:CWE-564",
+                  "cwe-name:sql-injection-through-hibernate"
+                ],
+                "precision": "very-high",
+                "cwe": [
+                  {
+                    "id": "CWE-89",
+                    "name": "SQL Injection",
+                    "category": "Injection",
+                    "severity": "high"
+                  },
+                  {
+                    "id": "CWE-564",
+                    "name": "SQL Injection through Hibernate",
+                    "category": "Injection",
+                    "severity": "high"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "js/path-traversal",
+              "name": "Path traversal",
+              "description": "This query checks for path traversal vulnerabilities.",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "filesystem",
+                  "cwe:CWE-22",
+                  "cwe-name:path-traversal",
+                  "cwe-category:path-traversal",
+                  "cwe-severity:high",
+                  "cwe:CWE-23",
+                  "cwe-name:unknown",
+                  "cwe-category:unknown",
+                  "cwe-severity:unknown",
+                  "cwe:CWE-36",
+                  "cwe:CWE-73"
+                ],
+                "precision": "high",
+                "cwe": [
+                  {
+                    "id": "CWE-22",
+                    "name": "Path Traversal",
+                    "category": "Path Traversal",
+                    "severity": "high"
+                  },
+                  {
+                    "id": "CWE-23",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-36",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-73",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "js/command-injection",
+              "name": "Command injection",
+              "description": "This query checks for command injection vulnerabilities.",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "injection",
+                  "cwe:CWE-78",
+                  "cwe-name:os-command-injection",
+                  "cwe-category:injection",
+                  "cwe-severity:critical",
+                  "cwe:CWE-88",
+                  "cwe-name:unknown",
+                  "cwe-category:unknown",
+                  "cwe-severity:unknown"
+                ],
+                "precision": "very-high",
+                "cwe": [
+                  {
+                    "id": "CWE-78",
+                    "name": "OS Command Injection",
+                    "category": "Injection",
+                    "severity": "critical"
+                  },
+                  {
+                    "id": "CWE-88",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "js/hardcoded-credentials",
+              "name": "Hardcoded credentials",
+              "description": "This query checks for hardcoded credentials.",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "credentials",
+                  "cwe:CWE-259",
+                  "cwe-name:use-of-hard-coded-password",
+                  "cwe-category:credentials",
+                  "cwe-severity:critical",
+                  "cwe:CWE-321",
+                  "cwe-name:unknown",
+                  "cwe-category:unknown",
+                  "cwe-severity:unknown",
+                  "cwe:CWE-798",
+                  "cwe-name:use-of-hard-coded-credentials",
+                  "cwe-category:authentication"
+                ],
+                "precision": "high",
+                "cwe": [
+                  {
+                    "id": "CWE-259",
+                    "name": "Use of Hard-coded Password",
+                    "category": "Credentials",
+                    "severity": "critical"
+                  },
+                  {
+                    "id": "CWE-321",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-798",
+                    "name": "Use of Hard-coded Credentials",
+                    "category": "Authentication",
+                    "severity": "critical"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "js/weak-cryptography",
+              "name": "Weak cryptography",
+              "description": "This query checks for weak cryptographic algorithms.",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "cryptography",
+                  "cwe:CWE-310",
+                  "cwe-name:cryptographic-issues",
+                  "cwe-category:cryptography",
+                  "cwe-severity:high",
+                  "cwe:CWE-311",
+                  "cwe-name:unknown",
+                  "cwe-category:unknown",
+                  "cwe-severity:unknown",
+                  "cwe:CWE-312",
+                  "cwe-name:cleartext-storage-of-sensitive-information",
+                  "cwe-category:sensitive-data",
+                  "cwe:CWE-319",
+                  "cwe:CWE-326",
+                  "cwe:CWE-327",
+                  "cwe-name:use-of-weak-cryptographic-algorithm"
+                ],
+                "precision": "high",
+                "cwe": [
+                  {
+                    "id": "CWE-310",
+                    "name": "Cryptographic Issues",
+                    "category": "Cryptography",
+                    "severity": "high"
+                  },
+                  {
+                    "id": "CWE-311",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-312",
+                    "name": "Cleartext Storage of Sensitive Information",
+                    "category": "Sensitive Data",
+                    "severity": "high"
+                  },
+                  {
+                    "id": "CWE-319",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-326",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-327",
+                    "name": "Use of Weak Cryptographic Algorithm",
+                    "category": "Cryptography",
+                    "severity": "high"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "js/prototype-pollution",
+              "name": "Prototype pollution",
+              "description": "This query checks for prototype pollution vulnerabilities.",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": [
+                  "security",
+                  "cwe:CWE-1321",
+                  "cwe-name:prototype-pollution",
+                  "cwe-category:prototype-pollution",
+                  "cwe-severity:high",
+                  "cwe:CWE-1419",
+                  "cwe-name:unknown",
+                  "cwe-category:unknown",
+                  "cwe-severity:unknown",
+                  "cwe:CWE-1420"
+                ],
+                "precision": "high",
+                "cwe": [
+                  {
+                    "id": "CWE-1321",
+                    "name": "Prototype Pollution",
+                    "category": "Prototype Pollution",
+                    "severity": "high"
+                  },
+                  {
+                    "id": "CWE-1419",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  },
+                  {
+                    "id": "CWE-1420",
+                    "name": "Unknown",
+                    "category": "Unknown",
+                    "severity": "unknown"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "js/injection",
+          "level": "error",
+          "message": {
+            "text": "User controlled data in a call to eval"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/user.js"
+                },
+                "region": {
+                  "startLine": 42,
+                  "startColumn": 10
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "cwe:CWE-89",
+              "cwe-name:sql-injection",
+              "cwe-category:injection",
+              "cwe-severity:high",
+              "cwe:CWE-90",
+              "cwe-name:unknown",
+              "cwe-category:unknown",
+              "cwe-severity:unknown",
+              "cwe:CWE-91",
+              "cwe:CWE-93",
+              "cwe:CWE-94",
+              "cwe-name:code-injection",
+              "cwe-severity:critical",
+              "cwe:CWE-95",
+              "cwe:CWE-96",
+              "cwe:CWE-97",
+              "cwe:CWE-98",
+              "cwe:CWE-99"
+            ]
+          }
+        },
+        {
+          "ruleId": "js/xss",
+          "level": "error",
+          "message": {
+            "text": "Potential cross-site scripting vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/auth.js"
+                },
+                "region": {
+                  "startLine": 15,
+                  "startColumn": 20
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "cwe:CWE-79",
+              "cwe-name:cross-site-scripting-(xss)",
+              "cwe-category:xss",
+              "cwe-severity:high",
+              "cwe:CWE-80",
+              "cwe-name:unknown",
+              "cwe-category:unknown",
+              "cwe-severity:unknown",
+              "cwe:CWE-81",
+              "cwe:CWE-82",
+              "cwe:CWE-83",
+              "cwe:CWE-84",
+              "cwe:CWE-85",
+              "cwe:CWE-86",
+              "cwe:CWE-87"
+            ]
+          }
+        },
+        {
+          "ruleId": "js/sql-injection",
+          "level": "error",
+          "message": {
+            "text": "SQL query built from user controlled sources"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/db.js"
+                },
+                "region": {
+                  "startLine": 28,
+                  "startColumn": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "cwe:CWE-89",
+              "cwe-name:sql-injection",
+              "cwe-category:injection",
+              "cwe-severity:high",
+              "cwe:CWE-564",
+              "cwe-name:sql-injection-through-hibernate"
+            ]
+          }
+        },
+        {
+          "ruleId": "js/path-traversal",
+          "level": "warning",
+          "message": {
+            "text": "Potential path traversal vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/files.js"
+                },
+                "region": {
+                  "startLine": 10,
+                  "startColumn": 15
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "cwe:CWE-22",
+              "cwe-name:path-traversal",
+              "cwe-category:path-traversal",
+              "cwe-severity:high",
+              "cwe:CWE-23",
+              "cwe-name:unknown",
+              "cwe-category:unknown",
+              "cwe-severity:unknown",
+              "cwe:CWE-36",
+              "cwe:CWE-73"
+            ]
+          }
+        },
+        {
+          "ruleId": "js/command-injection",
+          "level": "error",
+          "message": {
+            "text": "User input in command execution context"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/shell.js"
+                },
+                "region": {
+                  "startLine": 33,
+                  "startColumn": 8
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "cwe:CWE-78",
+              "cwe-name:os-command-injection",
+              "cwe-category:injection",
+              "cwe-severity:critical",
+              "cwe:CWE-88",
+              "cwe-name:unknown",
+              "cwe-category:unknown",
+              "cwe-severity:unknown"
+            ]
+          }
+        },
+        {
+          "ruleId": "js/hardcoded-credentials",
+          "level": "warning",
+          "message": {
+            "text": "Hardcoded password detected"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/config.js"
+                },
+                "region": {
+                  "startLine": 5,
+                  "startColumn": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "cwe:CWE-259",
+              "cwe-name:use-of-hard-coded-password",
+              "cwe-category:credentials",
+              "cwe-severity:critical",
+              "cwe:CWE-321",
+              "cwe-name:unknown",
+              "cwe-category:unknown",
+              "cwe-severity:unknown",
+              "cwe:CWE-798",
+              "cwe-name:use-of-hard-coded-credentials",
+              "cwe-category:authentication"
+            ]
+          }
+        },
+        {
+          "ruleId": "js/weak-cryptography",
+          "level": "warning",
+          "message": {
+            "text": "Use of weak cryptographic algorithm"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/crypto.js"
+                },
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 10
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "cwe:CWE-310",
+              "cwe-name:cryptographic-issues",
+              "cwe-category:cryptography",
+              "cwe-severity:high",
+              "cwe:CWE-311",
+              "cwe-name:unknown",
+              "cwe-category:unknown",
+              "cwe-severity:unknown",
+              "cwe:CWE-312",
+              "cwe-name:cleartext-storage-of-sensitive-information",
+              "cwe-category:sensitive-data",
+              "cwe:CWE-319",
+              "cwe:CWE-326",
+              "cwe:CWE-327",
+              "cwe-name:use-of-weak-cryptographic-algorithm"
+            ]
+          }
+        },
+        {
+          "ruleId": "js/prototype-pollution",
+          "level": "error",
+          "message": {
+            "text": "Prototype pollution vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/merge.js"
+                },
+                "region": {
+                  "startLine": 8,
+                  "startColumn": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "tags": [
+              "cwe:CWE-1321",
+              "cwe-name:prototype-pollution",
+              "cwe-category:prototype-pollution",
+              "cwe-severity:high",
+              "cwe:CWE-1419",
+              "cwe-name:unknown",
+              "cwe-category:unknown",
+              "cwe-severity:unknown",
+              "cwe:CWE-1420"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

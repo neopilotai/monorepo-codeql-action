@@ -1,0 +1,168 @@
+name: 'Changes'
+description: 'Detect which projects in a monorepo have been modified in a PR'
+inputs:
+  variables:
+    description: 'YAML string of variables to replace in an XML build file (optional)'
+    required: false
+  build-xml:
+    description: 'Path to the XML file that defines the projects to build (optional)'
+    required: false
+  projects-json:
+    description: 'Path to the JSON file that defines the projects to build (optional)'
+    required: false
+  queries:
+    description: 'List of queries to run, comma separated (optional)'
+    required: false
+    default: 'code-scanning'
+  config-file:
+    description: 'Path to CodeQL config to use (optional)'
+    required: false
+  config:
+    description: 'Inline CodeQL config YAML (optional)'
+    required: false
+  base-ref:
+    description: 'Base branch to compare against (optional, defaults to PR base)'
+    required: false
+  head-ref:
+    description: 'Head branch to compare (optional, defaults to PR head)'
+    required: false
+outputs:
+  projects:
+    description: JSON array of projects to analyze
+    value: ${{ steps.build-matrix.outputs.projects }}
+  scan-required:
+    description: Whether any scan is required
+    value: ${{ steps.check-changes.outputs.scan-required }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      if: github.event_name == 'pull_request'
+      with:
+        fetch-depth: 0
+
+    - name: Detect changed files
+      id: changed-files
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        result-encoding: string
+        script: |
+          const baseRef = process.env.INPUT_BASE_REF || context.payload.pull_request.base.ref
+          const headRef = process.env.INPUT_HEAD_REF || context.payload.pull_request.head.ref
+          
+          const response = await github.rest.repos.compareCommits({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            base: baseRef,
+            head: headRef
+          })
+          
+          const files = response.data.files || []
+          const changedFiles = files.map(f => f.filename)
+          console.log('Changed files:', JSON.stringify(changedFiles))
+          return JSON.stringify(changedFiles)
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install dependencies
+      run: |
+        cd $GITHUB_ACTION_PATH
+        npm install xml2js@0.6.2 yaml@2.5.1
+      shell: bash
+
+    - name: Read projects JSON
+      id: read-projects
+      if: inputs.projects-json
+      uses: actions/github-script@v7
+      env:
+        filename: ${{ inputs.projects-json }}
+      with:
+        result-encoding: string
+        script: |
+          const fs = require('fs')
+          try {
+            const projects = fs.readFileSync(process.env.filename, 'utf8')
+            return projects
+          } catch (error) {
+            core.setFailed(`Failed to read projects JSON: ${error}`)
+          }
+
+    - name: Build matrix from XML
+      id: build-projects
+      if: inputs.projects-json == '' && inputs.build-xml != ''
+      uses: actions/github-script@v7
+      env:
+        filename: ${{ inputs.build-xml }}
+        variables: ${{ inputs.variables }}
+      with:
+        result-encoding: string
+        script: |
+          const path = require('node:path')
+          const action_path = process.env.GITHUB_ACTION_PATH
+          const script = require(path.join(action_path, 'changes', 'build-projects-from-xml.js'))
+          return await script(github, context, core)
+
+    - name: Check if scan is required
+      id: check-changes
+      uses: actions/github-script@v7
+      env:
+        changed_files: ${{ steps.changed-files.outputs.result }}
+        projects: ${{ steps.read-projects.outputs.result || steps.build-projects.outputs.projects }}
+      with:
+        result-encoding: string
+        script: |
+          const changedFiles = JSON.parse(process.env.changed_files || '[]')
+          const projectsStr = process.env.projects || '{}'
+          
+          if (changedFiles.length === 0) {
+            core.setOutput('scan-required', 'false')
+            return 'false'
+          }
+          
+          const projectsData = JSON.parse(projectsStr)
+          let scanRequired = false
+          
+          for (const [language, langData] of Object.entries(projectsData)) {
+            const projects = langData.projects || {}
+            for (const [projectName, projectData] of Object.entries(projects)) {
+              const paths = projectData.paths || []
+              for (const projectPath of paths) {
+                for (const changedFile of changedFiles) {
+                  if (changedFile.startsWith(projectPath)) {
+                    console.log(`Project ${projectName} needs scanning (changed: ${changedFile})`)
+                    scanRequired = true
+                    break
+                  }
+                }
+                if (scanRequired) break
+              }
+              if (scanRequired) break
+            }
+            if (scanRequired) break
+          }
+          
+          core.setOutput('scan-required', scanRequired ? 'true' : 'false')
+          return scanRequired ? 'true' : 'false'
+
+    - name: Build matrix
+      id: build-matrix
+      uses: actions/github-script@v7
+      env:
+        projects: ${{ steps.read-projects.outputs.result || steps.build-projects.outputs.projects }}
+        queries: ${{ inputs.queries }}
+        config_file: ${{ inputs.config-file }}
+        config: ${{ inputs.config }}
+      with:
+        result-encoding: string
+        script: |
+          const path = require('node:path')
+          const action_path = process.env.GITHUB_ACTION_PATH
+          const script = require(path.join(action_path, 'changes', 'build-matrix.js'))
+          const result = await script(github, context, core)
+          core.setOutput('projects', JSON.stringify(result))
+          return JSON.stringify(result)

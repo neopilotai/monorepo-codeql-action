@@ -1,0 +1,101 @@
+# This is an example and must be tuned for using in your own repository.
+#
+# This workflow determines which sub projects of a monorepo are affected by a PR,
+# and then runs CodeQL analysis on those projects.
+#
+# It uses Actions from `khulnasoft/monorepo-codeql-action`
+#
+# To use it, place it under `.github/workflows` in your monorepo.
+#
+# The specific language and paths affected are passed to the CodeQL analysis,
+# along with a custom analysis workflow if one is provided.
+#
+# For TypeScript/JavaScript, Python, Ruby, Java and C#, you can let the CodeQL
+# Action handle the "build" step using `build-mode: none`.
+#
+# For Kotlin, Swift, C/C++, Rust and other languages, use `build-mode: autobuild`
+# to auto-detect the build system.
+#
+# Use `build-mode: manual` for custom build processes that require specific commands.
+#
+# Non-CodeQL tools are supported using the `other` build-mode.
+#
+# Either `manual` or `other` build-modes require a custom analysis workflow.
+#
+# You can find an example of custom analysis at:
+# https://github.com/khulnasoft/monorepo-codeql-action/examples/scanning-custom-analysis/action.yml
+
+name: 'CodeQL monorepo - PR'
+
+on:
+  pull_request:
+    branches: ['main']
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+      contents: read
+    outputs:
+      projects: ${{ steps.changes.outputs.projects }}
+      scan-required: ${{ steps.changes.outputs.scan-required }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changes to projects
+        id: changes
+        uses: khulnasoft/monorepo-codeql-action/actions/changes@main
+        with:
+          # Use JSON file for project configuration
+          projects-json: examples/projects.json
+
+          # Or use XML file with variable substitution:
+          # build-xml: examples/build-projects.xml
+          # variables: |
+          #   FolderADir: src/FolderA
+          #   FolderBDir: src/FolderB
+
+          # Optionally specify a CodeQL config file
+          # config-file: .github/codeql-config.yml
+
+          # Or inline config:
+          # config: |
+          #   queries:
+          #     - code-scanning
+
+  scan:
+    if: needs.changes.outputs.scan-required == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    needs: changes
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJson(needs.changes.outputs.projects).projects }}
+    steps:
+      - name: Analyze code
+        uses: khulnasoft/monorepo-codeql-action/actions/scan@main
+
+  republish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    needs: changes
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Republish results
+        uses: khulnasoft/monorepo-codeql-action/actions/republish-sarif@main
+        with:
+          projects: ${{ needs.changes.outputs.projects }}

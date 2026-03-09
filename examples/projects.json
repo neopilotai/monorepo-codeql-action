@@ -1,0 +1,99 @@
+{
+  "javascript": {
+    "projects": {
+      "FrontendApp": {
+        "paths": ["src/frontend"],
+        "build-mode": "autobuild",
+        "queries": "code-scanning"
+      }
+    }
+  },
+  "typescript": {
+    "projects": {
+      "WebApp": {
+        "paths": ["src/web"],
+        "build-mode": "none"
+      }
+    }
+  },
+  "python": {
+    "projects": {
+      "DataProcessing": {
+        "paths": ["src/data"],
+        "build-mode": "autobuild"
+      }
+    }
+  },
+  "java": {
+    "projects": {
+      "Backend": {
+        "paths": ["src/backend"],
+        "build-mode": "autobuild"
+      }
+    }
+  },
+  "kotlin": {
+    "projects": {
+      "AndroidApp": {
+        "paths": ["src/android"],
+        "build-mode": "autobuild"
+      }
+    }
+  },
+  "csharp": {
+    "projects": {
+      "APIService": {
+        "paths": ["src/api"],
+        "build-mode": "autobuild"
+      }
+    }
+  },
+  "go": {
+    "projects": {
+      "CLI": {
+        "paths": ["src/cli"],
+        "build-mode": "none"
+      }
+    }
+  },
+  "ruby": {
+    "projects": {
+      "Backend": {
+        "paths": ["src/backend"],
+        "build-mode": "none"
+      }
+    }
+  },
+  "swift": {
+    "projects": {
+      "IOSApp": {
+        "paths": ["src/ios"],
+        "build-mode": "autobuild"
+      }
+    }
+  },
+  "cpp": {
+    "projects": {
+      "NativeLib": {
+        "paths": ["src/native"],
+        "build-mode": "manual"
+      }
+    }
+  },
+  "php": {
+    "projects": {
+      "WebApp": {
+        "paths": ["src/web"],
+        "build-mode": "none"
+      }
+    }
+  },
+  "rust": {
+    "projects": {
+      "Tool": {
+        "paths": ["src/tool"],
+        "build-mode": "autobuild"
+      }
+    }
+  }
+}

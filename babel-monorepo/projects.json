@@ -1,0 +1,45 @@
+{
+  "javascript": {
+    "projects": {
+      "babel-core-parser": {
+        "paths": ["packages/babel-parser"],
+        "build-mode": "none",
+        "queries": "code-scanning"
+      },
+      "babel-core-generator": {
+        "paths": ["packages/babel-generator"],
+        "build-mode": "none",
+        "queries": "code-scanning"
+      },
+      "babel-core-traverse": {
+        "paths": ["packages/babel-traverse"],
+        "build-mode": "none",
+        "queries": "code-scanning"
+      },
+      "babel-core-types": {
+        "paths": ["packages/babel-types"],
+        "build-mode": "none",
+        "queries": "code-scanning"
+      }
+    }
+  },
+  "typescript": {
+    "projects": {
+      "babel-preset-env": {
+        "paths": ["packages/babel-preset-env"],
+        "build-mode": "none",
+        "queries": "code-scanning"
+      },
+      "babel-preset-react": {
+        "paths": ["packages/babel-preset-react"],
+        "build-mode": "none",
+        "queries": "code-scanning"
+      },
+      "babel-preset-typescript": {
+        "paths": ["packages/babel-preset-typescript"],
+        "build-mode": "none",
+        "queries": "code-scanning"
+      }
+    }
+  }
+}
