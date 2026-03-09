@@ -1,15 +1,13 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Debug Action",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "npx",
-      "cwd": "${workspaceRoot}",
-      "args": ["@github/local-action", ".", "src/main.js", ".env"],
-      "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**", "node_modules/**"]
-    }
-  ]
-}
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Run Annotator Test",
+        "type": "node",
+        "request": "launch",
+        "program": "${workspaceFolder}/tests/run-annotator-test.js",
+        "skipFiles": ["<node_internals>/**"],
+        "console": "integratedTerminal"
+      }
+    ]
+  }
