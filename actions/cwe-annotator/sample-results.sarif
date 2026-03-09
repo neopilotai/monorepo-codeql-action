@@ -1,0 +1,275 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "version": "2.14.0",
+          "informationUri": "https://codeql.github.com/",
+          "rules": [
+            {
+              "id": "js/injection",
+              "name": "Code injection",
+              "description": "This query checks for code injection vulnerabilities.",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": ["security", "injection"],
+                "precision": "very-high"
+              }
+            },
+            {
+              "id": "js/xss",
+              "name": "Cross-site scripting",
+              "description": "This query checks for XSS vulnerabilities.",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": ["security", "xss"],
+                "precision": "very-high"
+              }
+            },
+            {
+              "id": "js/sql-injection",
+              "name": "SQL injection",
+              "description": "This query checks for SQL injection vulnerabilities.",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": ["security", "injection", "database"],
+                "precision": "very-high"
+              }
+            },
+            {
+              "id": "js/path-traversal",
+              "name": "Path traversal",
+              "description": "This query checks for path traversal vulnerabilities.",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": ["security", "filesystem"],
+                "precision": "high"
+              }
+            },
+            {
+              "id": "js/command-injection",
+              "name": "Command injection",
+              "description": "This query checks for command injection vulnerabilities.",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": ["security", "injection"],
+                "precision": "very-high"
+              }
+            },
+            {
+              "id": "js/hardcoded-credentials",
+              "name": "Hardcoded credentials",
+              "description": "This query checks for hardcoded credentials.",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": ["security", "credentials"],
+                "precision": "high"
+              }
+            },
+            {
+              "id": "js/weak-cryptography",
+              "name": "Weak cryptography",
+              "description": "This query checks for weak cryptographic algorithms.",
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": ["security", "cryptography"],
+                "precision": "high"
+              }
+            },
+            {
+              "id": "js/prototype-pollution",
+              "name": "Prototype pollution",
+              "description": "This query checks for prototype pollution vulnerabilities.",
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": ["security"],
+                "precision": "high"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "js/injection",
+          "level": "error",
+          "message": {
+            "text": "User controlled data in a call to eval"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/user.js"
+                },
+                "region": {
+                  "startLine": 42,
+                  "startColumn": 10
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "js/xss",
+          "level": "error",
+          "message": {
+            "text": "Potential cross-site scripting vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/auth.js"
+                },
+                "region": {
+                  "startLine": 15,
+                  "startColumn": 20
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "js/sql-injection",
+          "level": "error",
+          "message": {
+            "text": "SQL query built from user controlled sources"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/db.js"
+                },
+                "region": {
+                  "startLine": 28,
+                  "startColumn": 5
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "js/path-traversal",
+          "level": "warning",
+          "message": {
+            "text": "Potential path traversal vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/files.js"
+                },
+                "region": {
+                  "startLine": 10,
+                  "startColumn": 15
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "js/command-injection",
+          "level": "error",
+          "message": {
+            "text": "User input in command execution context"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/shell.js"
+                },
+                "region": {
+                  "startLine": 33,
+                  "startColumn": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "js/hardcoded-credentials",
+          "level": "warning",
+          "message": {
+            "text": "Hardcoded password detected"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/config.js"
+                },
+                "region": {
+                  "startLine": 5,
+                  "startColumn": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "js/weak-cryptography",
+          "level": "warning",
+          "message": {
+            "text": "Use of weak cryptographic algorithm"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/crypto.js"
+                },
+                "region": {
+                  "startLine": 12,
+                  "startColumn": 10
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "js/prototype-pollution",
+          "level": "error",
+          "message": {
+            "text": "Prototype pollution vulnerability"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/merge.js"
+                },
+                "region": {
+                  "startLine": 8,
+                  "startColumn": 3
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

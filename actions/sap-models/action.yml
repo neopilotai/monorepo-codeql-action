@@ -1,0 +1,97 @@
+name: 'CodeQL SAP Security Analysis'
+description: 'Run CodeQL security analysis for SAP JavaScript frameworks'
+inputs:
+  language:
+    description: 'Target language (javascript)'
+    required: false
+    default: 'javascript'
+  framework:
+    description: 'SAP framework to analyze (cap, ui5, xsjs, all)'
+    required: false
+    default: 'all'
+  query-suite:
+    description: 'Query suite to run (security, security-extended, quality)'
+    required: false
+    default: 'security'
+  sarif-file:
+    description: 'Output SARIF file path'
+    required: false
+    default: 'sap-security-results.sarif'
+
+outputs:
+  results:
+    description: 'Analysis results'
+    value: ${{ steps.analyze.outputs.results }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ inputs.language }}
+        queries: ${{ inputs.query-suite }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install SAP models
+      run: |
+        echo "Installing SAP framework models..."
+        
+        if [ "${{ inputs.framework }}" = "cap" ] || [ "${{ inputs.framework }}" = "all" ]; then
+          echo "CAP models available at: sap-models/javascript/cap.js"
+          echo "CAP queries at: sap-models/javascript/queries/cap-security.ql"
+        fi
+        
+        if [ "${{ inputs.framework }}" = "ui5" ] || [ "${{ inputs.framework }}" = "all" ]; then
+          echo "UI5 models available at: sap-models/javascript/ui5.js"
+          echo "UI5 queries at: sap-models/javascript/queries/ui5-security.ql"
+        fi
+        
+        if [ "${{ inputs.framework }}" = "xsjs" ] || [ "${{ inputs.framework }}" = "all" ]; then
+          echo "XSJS models available at: sap-models/javascript/xsjs.js"
+          echo "XSJS queries at: sap-models/javascript/queries/xsjs-security.ql"
+        fi
+      shell: bash
+
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{ inputs.language }}"
+        output: ${{ inputs.sarif-file }}
+        upload: true
+
+    - name: Report results
+      id: analyze
+      uses: actions/github-script@v7
+      with:
+        result-encoding: string
+        script: |
+          const fs = require('fs');
+          const sarifFile = '${{ inputs.sarif-file }}';
+          
+          if (fs.existsSync(sarifFile)) {
+            const results = JSON.parse(fs.readFileSync(sarifFile, 'utf8'));
+            const run = results.runs[0];
+            const ruleIds = new Set();
+            
+            if (run.results) {
+              run.results.forEach(result => {
+                ruleIds.add(result.ruleId);
+              });
+              
+              console.log(`Found ${run.results.length} security issues`);
+              console.log(`Rule categories: ${Array.from(ruleIds).join(', ')}`);
+              
+              core.setOutput('results', JSON.stringify({
+                total: run.results.length,
+                rules: Array.from(ruleIds)
+              }));
+            }
+          }

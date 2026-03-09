@@ -1,0 +1,156 @@
+name: 'CodeQL Extractor'
+description: 'Extract code for CodeQL analysis with language-specific processing'
+inputs:
+  language:
+    description: 'Programming language to extract'
+    required: true
+  source-root:
+    description: 'Root directory of source code'
+    required: false
+    default: '.'
+  output-dir:
+    description: 'Directory for extracted database'
+    required: false
+    default: 'codeql-db'
+  queries:
+    description: 'CodeQL queries to run (optional)'
+    required: false
+  config:
+    description: 'CodeQL config file (optional)'
+    required: false
+  build-mode:
+    description: 'Build mode: none, autobuild, manual'
+    required: false
+    default: 'none'
+  install-dependencies:
+    description: 'Install dependencies before extraction'
+    required: false
+    default: 'true'
+  setup-python:
+    description: 'Setup Python environment for Python extraction'
+    required: false
+    default: 'true'
+  setup-java:
+    description: 'Setup Java environment for Java extraction'
+    required: false
+    default: 'true'
+
+outputs:
+  database:
+    description: 'Path to the extracted CodeQL database'
+    value: ${{ steps.extract.outputs.database }}
+  sarif-file:
+    description: 'Path to the SARIF output file'
+    value: ${{ steps.analyze.outputs.sarif-file }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout source
+      uses: actions/checkout@v4
+      with:
+        path: source-code
+        sparse-checkout: |
+          ${{ inputs.source-root }}
+        sparse-checkout-cone-mode: false
+
+    - name: Setup Node.js
+      if: inputs.language == 'javascript' || inputs.language == 'typescript'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Setup Python
+      if: inputs.language == 'python' && inputs.setup-python == 'true'
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Setup Java
+      if: inputs.language == 'java' || inputs.language == 'kotlin'
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Install dependencies
+      if: inputs.install-dependencies == 'true'
+      run: |
+        cd source-code/${{ inputs.source-root }}
+        
+        if [ -f "package.json" ]; then
+          npm install
+        elif [ -f "requirements.txt" ]; then
+          pip install -r requirements.txt
+        elif [ -f "Pipfile" ]; then
+          pip install pipenv && pipenv install
+        elif [ -f "go.mod" ]; then
+          go mod download
+        elif [ -f "Gemfile" ]; then
+          bundle install
+        elif [ -f "composer.json" ]; then
+          composer install
+        elif [ -f "Cargo.toml" ]; then
+          cargo fetch
+        elif [ -f "pom.xml" ]; then
+          mvn dependency:go-offline
+        fi
+      shell: bash
+
+    - name: Initialize CodeQL
+      id: init
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ inputs.language }}
+        build-mode: ${{ inputs.build-mode }}
+        config: ${{ inputs.config }}
+        queries: ${{ inputs.queries }}
+
+    - name: Build project
+      if: inputs.build-mode == 'autobuild'
+      run: |
+        cd source-code/${{ inputs.source-root }}
+        
+        if [ -f "package.json" ]; then
+          npm run build || npm run compile || true
+        elif [ -f "Makefile" ]; then
+          make
+        elif [ -f "CMakeLists.txt" ]; then
+          mkdir -p build && cd build && cmake .. && make
+        elif [ -f "pom.xml" ]; then
+          mvn compile -DskipTests
+        elif [ -f "build.gradle" ]; then
+          gradle build -x test
+        elif [ -f "Cargo.toml" ]; then
+          cargo build
+        fi
+      shell: bash
+
+    - name: Extract code
+      id: extract
+      uses: github/codeql-action/autobuild@v3
+      with:
+        category: "/language:${{ inputs.language }}"
+
+    - name: Create database directory
+      run: |
+        mkdir -p ${{ inputs.output-dir }}
+        if [ -d "codeql-database" ]; then
+          cp -r codeql-database/* ${{ inputs.output-dir }}/
+        fi
+      shell: bash
+
+    - name: Analyze code
+      id: analyze
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{ inputs.language }}"
+        output: ${{ inputs.output-dir }}/sarif-results
+        upload: false
+
+    - name: Set output paths
+      id: outputs
+      run: |
+        echo "database=${{ inputs.output-dir }}" >> $GITHUB_OUTPUT
+        echo "sarif-file=${{ inputs.output-dir }}/sarif-results/${{ inputs.language }}.sarif" >> $GITHUB_OUTPUT
+      shell: bash

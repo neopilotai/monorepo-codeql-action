@@ -1,0 +1,130 @@
+name: 'IaC Security Analysis'
+description: 'Run CodeQL security analysis on Infrastructure as Code files'
+inputs:
+  language:
+    description: 'Target language (terraform, kubernetes, docker, cloudformation)'
+    required: false
+    default: 'all'
+  query-suite:
+    description: 'Query suite to run (security, security-extended)'
+    required: false
+    default: 'security'
+  sarif-file:
+    description: 'Output SARIF file path'
+    required: false
+    default: 'iac-security-results.sarif'
+
+outputs:
+  results:
+    description: 'Analysis results'
+    value: ${{ steps.analyze.outputs.results }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: |
+          ${{ (inputs.language == 'terraform' || inputs.language == 'all') && 'terraform' || '' }}
+          ${{ (inputs.language == 'kubernetes' || inputs.language == 'all') && 'kubernetes' || '' }}
+          ${{ (inputs.language == 'docker' || inputs.language == 'all') && 'dockerfile' || '' }}
+
+    - name: Find IaC files
+      id: find-files
+      shell: bash
+      run: |
+        echo "Finding IaC files..."
+        
+        if [ "${{ inputs.language }}" = "terraform" ] || [ "${{ inputs.language }}" = "all" ]; then
+          echo "Finding Terraform files..."
+          terraform_files=$(find . -name "*.tf" -o -name "*.tfvars" 2>/dev/null | head -100)
+          echo "::set-output name=terraform::$terraform_files"
+        fi
+        
+        if [ "${{ inputs.language }}" = "kubernetes" ] || [ "${{ inputs.language }}" = "all" ]; then
+          echo "Finding Kubernetes files..."
+          k8s_files=$(find . -name "*.yaml" -o -name "*.yml" 2>/dev/null | grep -E "(kube|k8s|manifest)" | head -100)
+          echo "::set-output name=kubernetes::$k8s_files"
+        fi
+        
+        if [ "${{ inputs.language }}" = "docker" ] || [ "${{ inputs.language }}" = "all" ]; then
+          echo "Finding Docker files..."
+          docker_files=$(find . -name "Dockerfile*" -o -name "*.dockerfile" 2>/dev/null | head -100)
+          echo "::set-output name=docker::$docker_files"
+        fi
+        
+        if [ "${{ inputs.language }}" = "cloudformation" ] || [ "${{ inputs.language }}" = "all" ]; then
+          echo "Finding CloudFormation files..."
+          cf_files=$(find . -name "*.yaml" -o -name "*.yml" -o -name "*.json" 2>/dev/null | grep -i cloudformation | head -50)
+          echo "::set-output name=cloudformation::$cf_files"
+        fi
+
+    - name: Show found files
+      shell: bash
+      run: |
+        echo "Terraform: ${{ steps.find-files.outputs.terraform }}"
+        echo "Kubernetes: ${{ steps.find-files.outputs.kubernetes }}"
+        echo "Docker: ${{ steps.find-files.outputs.docker }}"
+        echo "CloudFormation: ${{ steps.find-files.outputs.cloudformation }}"
+
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:terraform"
+        output: ${{ inputs.sarif-file }}
+        upload: false
+
+    - name: Report results
+      id: analyze
+      uses: actions/github-script@v7
+      with:
+        result-encoding: string
+        script: |
+          const fs = require('fs');
+          const sarifFile = '${{ inputs.sarif-file }}';
+          
+          let totalResults = 0;
+          let resultsByRule = {};
+          
+          if (fs.existsSync(sarifFile)) {
+            const results = JSON.parse(fs.readFileSync(sarifFile, 'utf8'));
+            const runs = results.runs || [];
+            
+            for (const run of runs) {
+              const queryResults = run.results || [];
+              totalResults += queryResults.length;
+              
+              for (const result of queryResults) {
+                const ruleId = result.ruleId || 'unknown';
+                if (!resultsByRule[ruleId]) {
+                  resultsByRule[ruleId] = 0;
+                }
+                resultsByRule[ruleId]++;
+              }
+            }
+            
+            console.log(`Found ${totalResults} IaC security issues`);
+            console.log('Results by rule:');
+            for (const [rule, count] of Object.entries(resultsByRule)) {
+              console.log(`  ${rule}: ${count}`);
+            }
+            
+            core.setOutput('results', JSON.stringify({
+              total: totalResults,
+              byRule: resultsByRule
+            }));
+          } else {
+            console.log('No results file found');
+            core.setOutput('results', JSON.stringify({ total: 0 }));
+          }
+
+    - name: Upload SARIF
+      uses: actions/upload-artifact@v4
+      with:
+        name: iac-security-sarif
+        path: ${{ inputs.sarif-file }}
+        retention-days: 30

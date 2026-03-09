@@ -1,0 +1,153 @@
+name: 'CWE Annotator'
+description: 'Annotate SARIF results with CWE tags'
+inputs:
+  sarif-file:
+    description: 'Input SARIF file to annotate'
+    required: true
+  output-file:
+    description: 'Output annotated SARIF file'
+    required: false
+  add-category:
+    description: 'Add category tags'
+    required: false
+    default: 'true'
+  add-severity:
+    description: 'Add severity tags'
+    required: false
+    default: 'true'
+  add-cwe-id:
+    description: 'Add CWE ID tags'
+    required: false
+    default: 'true'
+  add-cwe-name:
+    description: 'Add CWE name tags'
+    required: false
+    default: 'true'
+  verbose:
+    description: 'Verbose output'
+    required: false
+    default: 'false'
+  summary:
+    description: 'Show annotation summary'
+    required: false
+    default: 'true'
+
+outputs:
+  annotated-file:
+    description: 'Path to annotated SARIF file'
+    value: ${{ steps.annotate.outputs.annotated-file }}
+  rules-annotated:
+    description: 'Number of rules annotated'
+    value: ${{ steps.annotate.outputs.rules-annotated }}
+  results-annotated:
+    description: 'Number of results annotated'
+    value: ${{ steps.annotate.outputs.results-annotated }}
+  unique-cwes:
+    description: 'List of unique CWE IDs found'
+    value: ${{ steps.annotate.outputs.unique-cwes }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Annotate SARIF with CWE
+      id: annotate
+      shell: bash
+      env:
+        INPUT_SARIF: ${{ inputs.sarif-file }}
+        OUTPUT_FILE: ${{ inputs.output-file }}
+        VERBOSE: ${{ inputs.verbose }}
+        SUMMARY: ${{ inputs.summary }}
+        ADD_CATEGORY: ${{ inputs.add-category }}
+        ADD_SEVERITY: ${{ inputs.add-severity }}
+        ADD_CWE_ID: ${{ inputs.add-cwe-id }}
+        ADD_CWE_NAME: ${{ inputs.add-cwe-name }}
+      run: |
+        cd $GITHUB_ACTION_PATH
+        
+        INPUT_FILE="$INPUT_SARIF"
+        
+        if [ -z "$OUTPUT_FILE" ]; then
+          OUTPUT_FILE="${INPUT_FILE%.sarif}-cwe-annotated.sarif"
+        fi
+        
+        ARGS=("-i" "$INPUT_FILE" "-o" "$OUTPUT_FILE" "-s")
+        
+        if [ "$VERBOSE" = "true" ]; then
+          ARGS+=("-v")
+        fi
+        
+        if [ "$ADD_CATEGORY" != "true" ]; then
+          ARGS+=("--no-category")
+        fi
+        
+        if [ "$ADD_SEVERITY" != "true" ]; then
+          ARGS+=("--no-severity")
+        fi
+        
+        if [ "$ADD_CWE_ID" != "true" ]; then
+          ARGS+=("--no-cwe-id")
+        fi
+        
+        if [ "$ADD_CWE_NAME" != "true" ]; then
+          ARGS+=("--no-cwe-name")
+        fi
+        
+        node cwe-annotator.js "${ARGS[@]}"
+        
+        echo "annotated-file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+        
+        # Parse summary
+        RULES_ANNOTATED=$(node -e "
+          const fs = require('fs');
+          const sarif = JSON.parse(fs.readFileSync('$OUTPUT_FILE', 'utf8'));
+          const rules = sarif.runs?.[0]?.rules || [];
+          let count = 0;
+          for (const rule of rules) {
+            if (rule.properties?.tags?.some(t => t.startsWith('cwe:'))) count++;
+          }
+          console.log(count);
+        ")
+        
+        RESULTS_ANNOTATED=$(node -e "
+          const fs = require('fs');
+          const sarif = JSON.parse(fs.readFileSync('$OUTPUT_FILE', 'utf8'));
+          const results = sarif.runs?.[0]?.results || [];
+          let count = 0;
+          for (const result of results) {
+            if (result.properties?.tags?.some(t => t.startsWith('cwe:'))) count++;
+          }
+          console.log(count);
+        ")
+        
+        UNIQUE_CWES=$(node -e "
+          const fs = require('fs');
+          const sarif = JSON.parse(fs.readFileSync('$OUTPUT_FILE', 'utf8'));
+          const rules = sarif.runs?.[0]?.rules || [];
+          const cwes = new Set();
+          for (const rule of rules) {
+            const tags = rule.properties?.tags || [];
+            for (const tag of tags) {
+              if (tag.startsWith('cwe:')) cwes.add(tag.substring(4));
+            }
+          }
+          console.log(Array.from(cwes).join(','));
+        ")
+        
+        echo "rules-annotated=$RULES_ANNOTATED" >> $GITHUB_OUTPUT
+        echo "results-annotated=$RESULTS_ANNOTATED" >> $GITHUB_OUTPUT
+        echo "unique-cwes=$UNIQUE_CWES" >> $GITHUB_OUTPUT
+
+    - name: Upload annotated SARIF
+      uses: actions/upload-artifact@v4
+      with:
+        name: cwe-annotated-sarif
+        path: ${{ steps.annotate.outputs.annotated-file }}
+        retention-days: 30

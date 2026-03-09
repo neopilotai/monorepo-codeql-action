@@ -1,0 +1,75 @@
+name: Republish
+description: 'Republish SARIF for languages that were not scanned in this PR'
+inputs:
+  projects:
+    description: 'Projects scanned in this PR'
+    required: true
+    type: string
+  merged-only:
+    description: 'Only republish SARIF when the PR merges'
+    required: false
+    type: boolean
+    default: false
+  sarif-dir:
+    description: 'Directory where SARIF files are stored'
+    required: false
+    type: string
+    default: './sarif'
+
+runs:
+  using: 'composite'
+  steps:
+    # Download SARIF files from previous analyses (for missing categories)
+    - name: Download SARIF files from target
+      uses: actions/github-script@v7
+      if: github.event_name == 'pull_request' && ( inputs.merged-only == false || github.event.pull_request.merged == true )
+      env:
+        projects: ${{ inputs.projects }}
+        SARIF_MODE: 'download'
+        SARIF_DIR: ${{ inputs.sarif-dir }}
+      with:
+        script: |
+          const path = require('node:path')
+          const action_path = process.env.GITHUB_ACTION_PATH
+          const script = require(path.join(action_path, 'republish-sarif.js'))
+          script(github, context, core)
+
+    # Scenario 1: PR mode - upload SARIF files via GitHub API to the PR itself
+    - name: Upload SARIF files to PR
+      uses: actions/github-script@v7
+      if: github.event_name == 'pull_request' && github.event.pull_request.merged != true && hashFiles(format('{0}/*.sarif', inputs.sarif-dir)) != ''
+      env:
+        SARIF_MODE: 'upload'
+        SARIF_DIR: ${{ inputs.sarif-dir }}
+      with:
+        script: |
+          const path = require('node:path')
+          const action_path = process.env.GITHUB_ACTION_PATH
+          const script = require(path.join(action_path, 'republish-sarif.js'))
+          
+          // Don't need to override context for PR upload - they are already set correctly
+          const prContext = context;
+          
+          script(github, prContext, core)
+
+    # Scenario 2: Merged mode - upload SARIF files via GitHub API to the PR target
+    - name: Upload SARIF files to PR target
+      uses: actions/github-script@v7
+      if: github.event.pull_request.merged == true && hashFiles(format('{0}/*.sarif', inputs.sarif-dir)) != ''
+      env:
+        SARIF_MODE: 'upload'
+        SARIF_DIR: ${{ inputs.sarif-dir }}
+      with:
+        script: |
+          const path = require('node:path')
+          const action_path = process.env.GITHUB_ACTION_PATH
+          const script = require(path.join(action_path, 'republish-sarif.js'))
+          
+          // Override context for target branch upload
+          const targetContext = {
+            ...context,
+            sha: context.payload.pull_request.head.sha,
+            ref: `refs/heads/${context.payload.pull_request.base.ref}`
+          }
+          
+          script(github, targetContext, core)

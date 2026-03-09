@@ -1,0 +1,82 @@
+# Sample Babel Monorepo - CodeQL Analysis Workflow
+
+name: 'CodeQL Monorepo Analysis'
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/**'
+      - '**.js'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/**'
+      - '**.js'
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.changes.outputs.projects }}
+      scan-required: ${{ steps.changes.outputs.scan-required }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changes
+        id: changes
+        uses: khulnasoft/monorepo-codeql-action/actions/changes@main
+        with:
+          projects-json: babel-monorepo/projects.json
+
+  codeql:
+    needs: changes
+    if: needs.changes.outputs.scan-required == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJson(needs.changes.outputs.projects).projects }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            ${{ matrix.project.sparse_checkout }}
+          sparse-checkout-cone-mode: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.project.language }}
+          queries: ${{ matrix.project.queries }}
+
+      - name: Build
+        if: matrix.project.build-mode == 'autobuild'
+        run: |
+          yarn install --frozen-lockfile || npm install
+
+      - name: Perform Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.project.language }}"
+          upload: true
+
+  security:
+    needs: changes
+    if: needs.changes.outputs.scan-required == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJson(needs.changes.outputs.projects).projects }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Security Analysis
+        uses: khulnasoft/monorepo-codeql-action/actions/scan@main

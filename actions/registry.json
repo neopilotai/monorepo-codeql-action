@@ -1,0 +1,82 @@
+{
+  "version": "1.0.0",
+  "name": "monorepo-codeql-action",
+  "description": "Monorepo CodeQL Action - Central action registry",
+  "actions": {
+    "changes": {
+      "path": "actions/changes",
+      "description": "Detect which projects in a monorepo have been modified in a PR",
+      "inputs": ["projects-json", "build-xml", "variables"],
+      "outputs": ["projects", "scan-required"]
+    },
+    "scan": {
+      "path": "actions/scan",
+      "description": "Run CodeQL analysis on a project",
+      "inputs": ["tools"],
+      "outputs": []
+    },
+    "republish-sarif": {
+      "path": "actions/republish-sarif",
+      "description": "Republish SARIF results for missing projects",
+      "inputs": ["projects", "sarif-dir", "merged-only"],
+      "outputs": []
+    },
+    "annotate-sarif": {
+      "path": "actions/annotate-sarif",
+      "description": "Annotate SARIF with project tags",
+      "inputs": ["project", "sarif_file", "output_file"],
+      "outputs": []
+    },
+    "extractor": {
+      "path": "actions/extractor",
+      "description": "Extract code for CodeQL analysis",
+      "inputs": ["language", "source-root", "output-dir", "build-mode"],
+      "outputs": ["database", "sarif-file"]
+    },
+    "cwe-annotator": {
+      "path": "actions/cwe-annotator",
+      "description": "Annotate SARIF with CWE tags",
+      "inputs": ["sarif-file", "output-file"],
+      "outputs": ["annotated-file"]
+    },
+    "iac-models": {
+      "path": "actions/iac-models",
+      "description": "Infrastructure as Code security queries",
+      "inputs": ["language", "query-suite"],
+      "outputs": ["results"]
+    },
+    "sap-models": {
+      "path": "actions/sap-models",
+      "description": "SAP framework (CAP, UI5, XSJS) CodeQL models",
+      "inputs": ["framework", "query-suite"],
+      "outputs": []
+    },
+    "mcp-server": {
+      "path": "actions/mcp-server",
+      "description": "Model Context Protocol server for CodeQL",
+      "inputs": ["codeql-path"],
+      "outputs": []
+    },
+    "repo-scan": {
+      "path": "actions/repo-scan",
+      "description": "Scan entire repository with CodeQL",
+      "inputs": ["projects-json", "build-xml"],
+      "outputs": ["projects"]
+    }
+  },
+  "supportedLanguages": [
+    "javascript",
+    "typescript", 
+    "python",
+    "java",
+    "kotlin",
+    "csharp",
+    "go",
+    "ruby",
+    "php",
+    "cpp",
+    "c",
+    "swift",
+    "rust"
+  ]
+}

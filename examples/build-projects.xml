@@ -1,0 +1,72 @@
+<projects>
+  <!-- JavaScript/TypeScript projects -->
+  <project language="javascript" name="FrontendApp">
+    <paths>src/frontend</paths>
+    <build-mode>autobuild</build-mode>
+    <queries>code-scanning</queries>
+  </project>
+
+  <project language="typescript" name="WebApp">
+    <paths>src/web</paths>
+    <build-mode>none</build-mode>
+  </project>
+
+  <!-- Python projects -->
+  <project language="python" name="DataProcessing">
+    <paths>src/data</paths>
+    <build-mode>autobuild</build-mode>
+  </project>
+
+  <!-- Java/Kotlin projects -->
+  <project language="java" name="Backend">
+    <paths>src/backend</paths>
+    <build-mode>autobuild</build-mode>
+  </project>
+
+  <project language="kotlin" name="AndroidApp">
+    <paths>src/android</paths>
+    <build-mode>autobuild</build-mode>
+  </project>
+
+  <!-- C# projects -->
+  <project language="csharp" name="APIService">
+    <paths>src/api</paths>
+    <build-mode>autobuild</build-mode>
+  </project>
+
+  <!-- Go projects -->
+  <project language="go" name="CLI">
+    <paths>src/cli</paths>
+    <build-mode>none</build-mode>
+  </project>
+
+  <!-- Ruby projects -->
+  <project language="ruby" name="Backend">
+    <paths>src/backend</paths>
+    <build-mode>none</build-mode>
+  </project>
+
+  <!-- Swift projects -->
+  <project language="swift" name="IOSApp">
+    <paths>src/ios</paths>
+    <build-mode>autobuild</build-mode>
+  </project>
+
+  <!-- C/C++ projects (require manual build) -->
+  <project language="cpp" name="NativeLib">
+    <paths>src/native</paths>
+    <build-mode>manual</build-mode>
+  </project>
+
+  <!-- PHP projects -->
+  <project language="php" name="WebApp">
+    <paths>src/web</paths>
+    <build-mode>none</build-mode>
+  </project>
+
+  <!-- Rust projects -->
+  <project language="rust" name="Tool">
+    <paths>src/tool</paths>
+    <build-mode>autobuild</build-mode>
+  </project>
+</projects>

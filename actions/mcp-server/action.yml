@@ -1,0 +1,88 @@
+name: 'CodeQL MCP Server'
+description: 'AI-assisted CodeQL query development through the Model Context Protocol'
+inputs:
+  codeql-path:
+    description: 'Path to CodeQL CLI'
+    required: false
+    default: 'codeql'
+  database-path:
+    description: 'Path to CodeQL database'
+    required: false
+  queries:
+    description: 'Query suite or path to queries'
+    required: false
+    default: 'security'
+  output-format:
+    description: 'Output format (sarif, csv, json)'
+    required: false
+    default: 'sarif'
+
+outputs:
+  results:
+    description: 'Analysis results'
+    value: ${{ steps.analyze.outputs.results }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install CodeQL
+      if: inputs.codeql-path == 'codeql'
+      uses: github/codeql-action/init@v3
+      with:
+        languages: javascript
+
+    - name: Install MCP Server dependencies
+      run: |
+        cd ${{ github.action_path }}/mcp-server
+        npm install
+      shell: bash
+      env:
+        CODEQL_PATH: ${{ inputs.codeql-path }}
+
+    - name: Create database
+      if: inputs.database-path == ''
+      id: create-db
+      run: |
+        cd ${{ github.action_path }}/mcp-server
+        npm start -- create-database
+      shell: bash
+
+    - name: Run analysis
+      id: analyze
+      if: inputs.database-path != ''
+      uses: actions/github-script@v7
+      env:
+        DATABASE_PATH: ${{ inputs.database-path }}
+        QUERIES: ${{ inputs.queries }}
+        OUTPUT_FORMAT: ${{ inputs.output-format }}
+      with:
+        result-encoding: string
+        script: |
+          const { execSync } = require('child_process');
+          const dbPath = process.env.DATABASE_PATH;
+          const queries = process.env.QUERIES;
+          const format = process.env.OUTPUT_FORMAT;
+
+          try {
+            const output = execSync(`codeql database analyze ${dbPath} ${queries} --format=${format} --output=results.${format}`, {
+              encoding: 'utf8'
+            });
+            console.log(output);
+            core.setOutput('results', 'Analysis completed');
+          } catch (error) {
+            core.setFailed(error.message);
+          }
+
+    - name: Start MCP Server
+      if: false
+      run: |
+        cd ${{ github.action_path }}/mcp-server
+        npm start
+      shell: bash
+      env:
+        CODEQL_PATH: ${{ inputs.codeql-path }}
